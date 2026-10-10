@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#071b42">
+<title>小杨游戏分享 · Game Portal</title>
+<style>
+:root{--cyan:#7be8ff;--blue:#4da4ff;--glass:rgba(9,28,66,.38);--line:rgba(174,225,255,.28)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;color:#f5fbff}
+body{min-height:100vh;overflow-x:hidden;background:#061a3a}
+.backdrop{position:fixed;inset:0;z-index:-5;background-image:linear-gradient(180deg,rgba(3,13,33,.12),rgba(4,18,42,.08) 58%,rgba(3,13,31,.22)),url("assets/rainy-blue-background.jpg");background-size:cover;background-position:center;background-repeat:no-repeat;animation:backdropDrift 28s ease-in-out infinite alternate;transform-origin:center}
+@keyframes backdropDrift{from{transform:scale(1)}to{transform:scale(1.055)}}
+.background-video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:-4;pointer-events:none}
+.video-tint{position:fixed;inset:0;z-index:-3;pointer-events:none;background:linear-gradient(180deg,rgba(2,12,32,.14),rgba(4,22,54,.1) 55%,rgba(2,11,29,.28))}
+
+.grid{position:fixed;inset:0;z-index:-3;pointer-events:none;background:radial-gradient(ellipse at center,transparent 20%,rgba(0,10,30,.16) 100%)}
+#particles{position:fixed;inset:0;width:100%;height:100%;z-index:-2;pointer-events:none}
+.scanline{display:none}
+.page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:42px 20px}
+.portal{width:min(100%,620px);text-align:center;position:relative}
+.eyebrow{font-size:11px;letter-spacing:.34em;color:#9deaff;text-transform:uppercase;opacity:.86;margin-bottom:22px}
+.avatar-wrap{width:138px;height:138px;margin:0 auto 22px;padding:4px;border-radius:50%;position:relative;background:rgba(239,250,255,.8);box-shadow:0 0 18px #c7edffb5,0 0 58px #b7e8ff8a;animation:float 5s ease-in-out infinite}
+.avatar-wrap:before{content:"";position:absolute;inset:-7px;border:1px solid rgba(231,247,255,.7);border-radius:50%;box-shadow:0 0 18px rgba(208,240,255,.3)}
+.avatar-wrap:after{content:"";position:absolute;width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 0 15px #d5f5ff;top:8px;right:14px}
+.avatar{width:100%;height:100%;display:block;object-fit:cover;border-radius:50%;background:#fff}
+@keyframes float{50%{transform:translateY(-7px)}}
+@keyframes orbit{to{transform:rotate(360deg)}}
+h1{font-size:clamp(27px,5vw,38px);letter-spacing:.08em;margin:0;font-weight:750;text-shadow:0 0 24px #65bfff75}
+.subtitle{margin:12px 0 34px;color:rgba(225,242,255,.75);font-size:13px;letter-spacing:.15em}
+.status{display:flex;align-items:center;justify-content:center;gap:8px;color:#a8e8ff;font-size:11px;letter-spacing:.15em;margin-bottom:18px}
+.status-dot{width:6px;height:6px;background:#6fffd1;border-radius:50%;box-shadow:0 0 12px #6fffd1}
+.options{display:grid;gap:14px;margin:0 auto;max-width:490px}
+.portal-link{position:relative;display:flex;align-items:center;gap:16px;text-align:left;padding:19px 22px;border:1px solid rgba(207,235,255,.22);border-radius:3px;color:#fff;text-decoration:none;background:linear-gradient(100deg,rgba(7,28,64,.24),rgba(25,72,119,.14));backdrop-filter:blur(9px);box-shadow:inset 0 1px rgba(255,255,255,.06),0 8px 28px rgba(0,0,0,.06);overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s}
+.portal-link:before{content:"";position:absolute;inset:0;transform:translateX(-120%);background:linear-gradient(100deg,transparent,rgba(137,235,255,.13),transparent);transition:transform .65s}
+.portal-link:hover{transform:translateY(-3px);border-color:rgba(139,231,255,.78);box-shadow:0 0 26px rgba(65,170,255,.18),inset 0 1px rgba(255,255,255,.12)}
+.portal-link:hover:before{transform:translateX(120%)}
+.icon-box{width:44px;height:44px;flex:0 0 44px;border-radius:8px;display:grid;place-items:center;background:rgba(164,218,255,.08);border:1px solid rgba(203,236,255,.17);color:#c6efff}
+.icon-box svg{width:23px;height:23px}
+.link-copy{flex:1;min-width:0}
+.link-title{font-size:17px;font-weight:650;letter-spacing:.06em}
+.link-desc{font-size:11px;color:rgba(218,239,255,.62);margin-top:5px;letter-spacing:.05em}
+.arrow{font-size:21px;color:#9deaff;transition:transform .25s}
+.portal-link:hover .arrow{transform:translateX(4px)}
+.note{margin-top:29px;font-size:11px;color:rgba(218,239,255,.52);letter-spacing:.1em}
+.footer{margin-top:46px;color:rgba(199,225,255,.36);font-size:10px;letter-spacing:.16em}
+.footer span{color:rgba(139,225,255,.65)}
+@media(max-width:480px){.backdrop{background-position:center;background-size:cover}.background-video{object-fit:cover}.page{padding:30px 18px}.avatar-wrap{width:120px;height:120px}.portal-link{padding:16px}.subtitle{font-size:12px}.footer{margin-top:34px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="backdrop"></div><video class="background-video" autoplay muted loop playsinline preload="auto" aria-hidden="true"><source src="assets/background-video.mp4" type="video/mp4"></video><div class="video-tint"></div><div class="grid"></div><canvas id="particles"></canvas><div class="scanline"></div>
+<main class="page">
+  <section class="portal">
+    <div class="eyebrow">PERSONAL GAME HUB / 001</div>
+    <div class="avatar-wrap"><img class="avatar" src="assets/avatar.jpg" alt="小杨游戏分享头像"></div>
+    <h1>小杨游戏分享</h1>
+    <p class="subtitle">小杨分享，用心分享</p>
+    <div class="status"><span class="status-dot"></span> WELCOME TO MY SPACE <span>·</span> 小杨游戏分享</div>
+    <nav class="options" aria-label="网站导航">
+      <!-- 后期只需要修改下方两个链接的 href 即可 -->
+      <a class="portal-link" href="#" data-link="pack" aria-label="整合包，链接待设置">
+        <span class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.5 7.8 7.5 4.4 7.5-4.4M12 12.2V21M8 5.3l8 4.5"/></svg></span>
+        <span class="link-copy"><span class="link-title">整合包</span><span class="link-desc">MOD PACKS / 精选整合与玩法合集</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="portal-link" href="#" data-link="resources" aria-label="游戏资源，链接待设置">
+        <span class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4.5h6l2 2h8v13H4z"/><path d="M4 9h16M8 13h8M8 16.5h5"/></svg></span>
+        <span class="link-copy"><span class="link-title">游戏资源</span><span class="link-desc">GAME RESOURCES / 工具、材质与实用资源</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="portal-link" href="#" data-link="tools" aria-label="工具，链接待设置">
+        <span class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14.5 6.5a5 5 0 0 0-6.9 6.9L3.5 17.5a2.1 2.1 0 0 0 3 3l4.1-4.1a5 5 0 0 0 6.9-6.9l-3 3-3-3 3-3Z"/><path d="m16 4 4 4"/></svg></span>
+        <span class="link-copy"><span class="link-title">工具</span><span class="link-desc">TOOLS / 游戏辅助与实用工具</span></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="portal-link" href="#" data-link="emulator" aria-label="模拟器，链接待设置">
+        <span class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M7 10v4M5 12h4M15.5 10.5h.01M18 13.5h.01M9 16h6"/></svg></span>
+        <span class="link-copy"><span class="link-title">模拟器</span><span class="link-desc">EMULATORS / 多平台模拟体验</span></span>
+        <span class="arrow">↗</span>
+      </a>
+    </nav>
+    <p class="note">选择下方入口，探索更多游戏内容</p>
+    <div class="footer">DESIGNED FOR <span>小杨游戏分享</span>　/　STAY CURIOUS</div>
+  </section>
+</main>
+<script>
+/* ===== 后期在这里填写你的真实网址 =====
+   例如：pack: "https://你的整合包网址",
+         resources: "https://你的游戏资源网址"
+*/
+const DESTINATIONS = {
+  pack: "https://www.kdocs.cn/l/caVZSLUklOx3",
+  resources: "https://www.kdocs.cn/l/ca66nxWAXSYT",
+  tools: "https://www.kdocs.cn/l/cuWxKcLlZ6kj",
+  emulator: "https://www.kdocs.cn/l/cqI9NXupVs2V"
+};
+document.querySelectorAll("[data-link]").forEach(link => {
+  const key = link.dataset.link;
+  link.href = DESTINATIONS[key] || "#";
+  link.addEventListener("click", event => {
+    if (!DESTINATIONS[key] || DESTINATIONS[key] === "#") {
+      event.preventDefault();
+      const name = key === "pack" ? "整合包" : "游戏资源";
+      alert(`「${name}」的链接还没有设置。打开 index.html，在 DESTINATIONS 中填写网址即可。`);
+    }
+  });
+});
+// 雨滴玻璃效果：水珠缓慢下滑、拉伸、合并感轻微漂移
+const canvas = document.getElementById("particles"), ctx = canvas.getContext("2d");
+let w, h, dpr, drops = [], mouse = {x:-1000,y:-1000}, last = 0;
+function makeDrop(randomY=true){
+  const r = Math.random()*5.2 + 1.1;
+  return {x:Math.random()*w,y:randomY?Math.random()*h:-Math.random()*h*.25,
+    r,vy:Math.random()*.65+.18,vx:(Math.random()-.5)*.22,
+    stretch:Math.random()*1.3+.55,alpha:Math.random()*.42+.16,
+    phase:Math.random()*Math.PI*2,trail:Math.random()*15+4};
+}
+function resize(){
+  dpr=Math.min(window.devicePixelRatio||1,2);w=window.innerWidth;h=window.innerHeight;
+  canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+"px";canvas.style.height=h+"px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const count=Math.min(380,Math.max(150,Math.floor(w*h/3300)));
+  drops=Array.from({length:count},()=>makeDrop(true));
+}
+window.addEventListener("resize",resize);
+window.addEventListener("pointermove",e=>{mouse.x=e.clientX;mouse.y=e.clientY});
+window.addEventListener("pointerleave",()=>{mouse.x=-1000;mouse.y=-1000});
+function draw(now=0){
+  const dt=Math.min((now-last)/16.67||1,2);last=now;
+  ctx.clearRect(0,0,w,h);
+  for(const p of drops){
+    p.phase+=.012*dt;
+    p.y+=p.vy*dt;
+    p.x+= (p.vx+Math.sin(p.phase)*.12)*dt;
+    const dx=p.x-mouse.x,dy=p.y-mouse.y,dist=Math.hypot(dx,dy);
+    if(dist<85){p.x+=dx/(dist||1)*.14*dt;p.y+=dy/(dist||1)*.09*dt}
+    if(p.y>h+24||p.x<-30||p.x>w+30){Object.assign(p,makeDrop(false));p.x=Math.random()*w;p.y=-p.r*3}
+    const rx=p.r*.72, ry=p.r*p.stretch;
+    // faint falling tail
+    const tail=ctx.createLinearGradient(p.x,p.y-p.trail,p.x,p.y+ry);
+    tail.addColorStop(0,"rgba(175,224,255,0)");
+    tail.addColorStop(1,`rgba(170,222,255,${p.alpha*.36})`);
+    ctx.strokeStyle=tail;ctx.lineWidth=Math.max(.6,p.r*.24);
+    ctx.beginPath();ctx.moveTo(p.x-p.vx*4,p.y-p.trail);ctx.quadraticCurveTo(p.x-rx*.4,p.y-ry*.4,p.x,p.y+ry);ctx.stroke();
+    // droplet body with cool blue refraction
+    const grad=ctx.createRadialGradient(p.x-rx*.35,p.y-ry*.35,.2,p.x,p.y,Math.max(rx,ry)*1.35);
+    grad.addColorStop(0,`rgba(226,247,255,${p.alpha*.8})`);
+    grad.addColorStop(.26,`rgba(105,183,235,${p.alpha*.48})`);
+    grad.addColorStop(.68,`rgba(25,85,157,${p.alpha*.25})`);
+    grad.addColorStop(1,`rgba(8,36,83,${p.alpha*.08})`);
+    ctx.fillStyle=grad;ctx.beginPath();ctx.ellipse(p.x,p.y,rx,ry,Math.sin(p.phase)*.12,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=`rgba(186,229,255,${p.alpha*.65})`;ctx.lineWidth=.65;
+    ctx.beginPath();ctx.ellipse(p.x,p.y,rx,ry,Math.sin(p.phase)*.12,-.8,1.8);ctx.stroke();
+    ctx.fillStyle=`rgba(244,252,255,${p.alpha*.8})`;
+    ctx.beginPath();ctx.ellipse(p.x-rx*.28,p.y-ry*.38,Math.max(.45,rx*.18),Math.max(.8,ry*.18),-.25,0,Math.PI*2);ctx.fill();
+  }
+  requestAnimationFrame(draw);
+}
+resize();requestAnimationFrame(draw);
+</script>
+</body>
+</html>
